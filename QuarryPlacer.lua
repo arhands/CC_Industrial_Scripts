@@ -29,13 +29,10 @@ function travelVirtical(distance) do
         end
     end
 end
-function goToNextNode()
-    travel(quarrySpacing + quarrySpacing);
-    turtle.turnRight();
-    travel(quarrySpacing);
-end
-
-function buildEdgeNode()
+--
+--NODES
+--
+function buildCornerNode()
     travelVirtical(-height);
     turtle.select(cobbleSlot);
     turtle.placeDown();
@@ -44,13 +41,46 @@ function buildEdgeNode()
     turtle.placeDown();
     travelVirtical(height - 1);
 end
-
+function buildEdgeNode(horizontal)
+    if(horizontal) then
+        buildCornerNode();
+        travel(2);
+        turtle.turnRight();
+        travel(2);
+        turtle.turnLeft();
+        buildCornerNode();
+    else
+        buildCornerNode();
+        travel(2);
+        turtle.turnRight();
+        travel(2);
+        turtle.turnLeft();
+        buildCornerNode();
+    end
+end
 --no quarries or power
-function buildInnerNode()
-    travelVirtical(1-height);
+function buildInnerNodeNoQuarry()
     for(i = 1, 4, 1) do
-        buildEdgeNode();
+        buildCornerNode();
         travel(quarrySpacing);
+        turtle.turnLeft();
+        travel(quarrySpacing);
+        turtle.turnLeft();
         turtle.turnLeft();
     end
 end
+
+function buildInnerNodeQuarry()
+    buildInnerNode();
+    turtle.down();
+    for(i = 1, 4, 1) do
+        turtle.forward();
+        turtle.select(cobbleSlot);
+        turtle.placeUp();
+        turtle.back();
+        turtle.select(markerSlot);
+        turtle.placeUp();
+        travelVirtical(2 - height);
+    end
+end
+
