@@ -9,22 +9,23 @@ local height = 4;
 local markerSlot = 1;
 local quarrySlot = 2;
 local cobbleSlot = 3;
+local fuel = 4;
 
 function travel(distance)
-    for(i = 1, distance, 1) do
+    for i = 1, distance, 1 do
         turtle.forward();
     end
 end
 
 --input can be negative
-function travelVirtical(distance) do
+function travelVirtical(distance)
     if(distance < 0) then
         distance = -distance;
-        for(i = 1, distance,1) do
+        for i = 1, distance,1 do
             turtle.down();
         end
     else
-        for(i = 1, distance,1) do
+        for i = 1, distance,1 do
             turtle.up();
         end
     end
@@ -37,7 +38,7 @@ function buildCornerNode()
     travelVirtical(-height);
     turtle.select(cobbleSlot);
     turtle.placeDown();
-    turtle.travelVirtical(1);
+    travelVirtical(1);
     turtle.select(markerSlot);
     turtle.placeDown();
     travelVirtical(height - 1);
@@ -61,7 +62,7 @@ function buildEdgeNode(horizontal)
 end
 --no quarries or power
 function buildInnerNode()
-    for(i = 1, 4, 1) do
+    for i = 1, 4, 1 do
         buildCornerNode();
         travel(quarrySpacing);
         turtle.turnLeft();
@@ -69,57 +70,64 @@ function buildInnerNode()
         turtle.turnLeft();
         turtle.turnLeft();
     end
+    travel(2*quarrySpacing);
 end
 --upgrades an inner node to an inner node w/ quarry
 function upgradeNodeQuarry()
     turtle.down();
-    for(i = 1, 4, 1) do
-        turtle.forward();
+    for i = 1, 4, 1 do
         turtle.select(cobbleSlot);
-        turtle.placeUp();
-
-        turtle.back();
+        turtle.placeDown();
+        
+        turtle.up();
         turtle.select(markerSlot);
-        turtle.placeUp();
-
-        travelVirtical(2 - height);
-        turtle.placeDown();--to activate the quarry shape
-
+        turtle.placeDown();
         turtle.forward();
+        travelVirtical(-height);
+        
+        turtle.turnLeft();
+        turtle.turnLeft();
+        turtle.place();
+        
+        turtle.up();
         turtle.select(quarrySlot);
         turtle.placeDown();
-        travelVirtical(height - 2);
-        travel(quarrySpacing - 1);
+        
         turtle.turnLeft();
         travel(quarrySpacing);
         turtle.turnLeft();
+        travel(quarrySpacing - 1);
+        travelVirtical(height - 2);
         turtle.turnLeft();
     end
-    turtle.up();
-    turtle.turnLeft();
-    turtle.turnLeft();
+    travel(quarrySpacing);
+    travelVirtical(3);
+    travel(quarrySpacing);
 end
 
+--
+--END node section
+--
 function buildQuarryCluster(size)
     --outside
-    for(i = 1, 4, 1) do
+    for i = 1, 4, 1 do
         buildCornerNode();
-        for(j = 2, size, 1) do
+        for j = 2, size, 1 do
             travel(quarrySize);
             buildEdgeNode(i % 2 == 0);
         end
-        if(i < 4) do
+        if(i < 4) then
             travel(quarrySize);
         end
         turtle.turnRight();
     end
     --inside
-    for(i = 2, size, 1) do
-        for(j = 2, size, 1) do
+    for i = 2, size, 1 do
+        for j = 2, size, 1 do
             travel(quarrySize);
             buildInnerNode();
         end
-        if(i % 2 == 0) do
+        if(i % 2 == 0) then
             turtle.turnRight();
             travel(quarrySize);
             turtle.turnRight();
@@ -130,14 +138,14 @@ function buildQuarryCluster(size)
         end
     end
     --place quarries
-    for(i = 2, size, 1) do
-        for(j = 2, size, 1) do
+    for i = 2, size, 1 do
+        for j = 2, size, 1 do
             travel(quarrySize);
-            if(j % 2 == 0) do
+            if(j % 2 == 0) then
                 upgradeNodeQuarry()
             end
         end
-        if(i % 2 == 0) do
+        if(i % 2 == 0) then
             turtle.turnRight();
             travel(quarrySize);
             turtle.turnRight();
@@ -148,4 +156,6 @@ function buildQuarryCluster(size)
         end
     end
 end
-
+turtle.select(4);
+turtle.refuel();
+buildQuarryCluster(2);
