@@ -44,8 +44,16 @@ function checkMarkers()
         findItemIndex("marker");
     end
 end
+function checkPipes()
+    if(turtle.getItemCount(markerSlot) == 0) then
+        findItemIndex("pipe");
+    end
+end
 
 function travel(distance)
+    if(distance == 0) then
+        return;
+    end
     for i = 1, distance, 1 do
         turtle.forward();
     end
@@ -97,51 +105,39 @@ function buildEdgeNode(horizontal)
     end
 end
 --no quarries or power
-function buildInnerNode()
+function buildInnerNode(addQuarrySetup)
     for i = 1, 3, 1 do
         buildCornerNode();
+        if(addQuarrySetup) then
+            turtle.down();
+            turtle.select(cobbleSlot);
+            turtle.placeDown();
+            turtle.up();
+            checkMarkers();
+            turtle.select(markerSlot);
+            turtle.placeDown();
+        end
         travel(quarrySpacing);
+        if(i = 3 && addQuarrySetup) then
+
+        end
         turtle.turnLeft();
-        travel(quarrySpacing);
+        if(addQuarrySetup) then
+            travel(quarrySpacing - 1);
+            travelVirtical(1 - height);
+            checkPipe();
+            turtle.select(woodPipeSlot);
+            turtle.placeDown();
+            travelVirtical(height - 1);
+            turtle.forward();
+        else
+            travel(quarrySpacing);
+        end
         turtle.turnLeft();
         turtle.turnLeft();
     end
     buildCornerNode();
     turtle.turnRight();
-end
---upgrades an inner node to an inner node w/ quarry
-function upgradeNodeQuarry()
-    turtle.turnLeft();
-    for i = 1, 4, 1 do
-        turtle.down();
-        checkCobble();
-        turtle.select(cobbleSlot);
-        turtle.placeDown();
-        turtle.up();
-        turtle.select(markerSlot);
-        checkMarkers();
-        turtle.placeDown();
-        
-        turtle.turnRight();
-        turtle.forward();
-        turtle.turnLeft();
-
-        --place stuff AND return to local default height
-
-
-        if(i < 4) then
-            travel(quarrySpacing);
-            turtle.turnRight();
-            travel(quarrySpacing - 1);
-        end
-    end
-    turtle.turnRight();
-    travel(quarrySpacing - 1);
-
-    --place power/storage stuff AND return to local default height
-
-
-    travel(quarrySpacing);
 end
 
 --
@@ -166,7 +162,7 @@ function buildQuarryCluster(size)
 
     for i = 2, size, 1 do
         for j = 2, size, 1 do
-            buildInnerNode();
+            buildInnerNode((i + j) % 2 == 0);
             if(j < size) then
                 travel(quarrySize-1);
             end
@@ -180,33 +176,6 @@ function buildQuarryCluster(size)
             else
                 turtle.turnRight();
                 travel(quarrySize-1);
-                turtle.turnRight();
-            end
-        end
-    end
-
-    --place quarries
-    turtle.turnLeft();
-
-    for i = 2, size, 1 do
-        for j = 2, size, 1 do
-            if((j + i) % 2 == 0) then
-                upgradeNodeQuarry();
-            else
-                travel(quarrySpacing);
-                turtle.turnLeft();
-                travel(quarrySpacing);
-            end
-        end
-        if(i < size) then
-            if(i % 2 == 0) then
-                turtle.turnLeft();
-                travel(quarrySize-1);
-            else
-                turtle.turnRight();
-                travel(quarrySize-1 + 2*quarrySpacing);
-                turtle.turnRight();
-                travel(quarrySpacing*2);
                 turtle.turnRight();
             end
         end
