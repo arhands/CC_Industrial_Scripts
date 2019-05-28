@@ -12,6 +12,7 @@ local woodPipeSlot = 3;
 local mjProducerSlot = 0;
 local fuel = 3;
 local powerBridgeSlot = 0;
+local enderChestSlot = 0;
 
 function refreshItemLocations()
     markerSlot = findItemIndex("marker");
@@ -20,7 +21,7 @@ function refreshItemLocations()
     mjProducerSlot = findItemIndex("producer");
     powerBridgeSlot = findItemIndex("bridge");
     fuel = findItemIndex("coal");
-    
+    enderChestSlot = findItemIndex("chest");
 end
 function findItemIndex(name)
     for i = 1,16,1 do
@@ -30,7 +31,7 @@ function findItemIndex(name)
             end
         end
     end
-    return -1;
+    return 16;
 end
 
 function checkCobble()
@@ -106,7 +107,7 @@ function buildEdgeNode(horizontal)
 end
 --no quarries or power
 function buildInnerNode(addQuarrySetup)
-    for i = 1, 3, 1 do
+    for i = 1, 4, 1 do
         buildCornerNode();
         if(addQuarrySetup) then
             turtle.down();
@@ -116,28 +117,45 @@ function buildInnerNode(addQuarrySetup)
             checkMarkers();
             turtle.select(markerSlot);
             turtle.placeDown();
-        end
-        travel(quarrySpacing);
-        if(i = 3 && addQuarrySetup) then
-
-        end
-        turtle.turnLeft();
-        if(addQuarrySetup) then
-            travel(quarrySpacing - 1);
-            travelVirtical(1 - height);
-            checkPipe();
+            
+            turtle.forward();
+            travelVirtical(2 - height);
+            checkPipes();
             turtle.select(woodPipeSlot);
             turtle.placeDown();
-            travelVirtical(height - 1);
-            turtle.forward();
+            travelVirtical(height - 2);
+            travel(quarrySpacing - 1);
         else
             travel(quarrySpacing);
         end
-        turtle.turnLeft();
-        turtle.turnLeft();
+        if(i == 3) then
+            if(addQuarrySetup) then
+                travelVirtical(-height);
+                turtle.select(powerBridgeSlot);
+                turtle.placeDown();
+                turtle.up();
+
+                turtle.select(mjProducerSlot);
+                turtle.placeDown();
+                turtle.up();
+
+                turtle.select(enderChestSlot);
+                turtle.placeDown();
+                
+                travelVirtical(height - 2);
+            end
+        end
+        if(i < 4) then
+            turtle.turnLeft();
+            travel(quarrySpacing);
+            turtle.turnLeft();
+            turtle.turnLeft();
+        end
     end
-    buildCornerNode();
     turtle.turnRight();
+    turtle.turnRight();
+    travel(quarrySpacing);
+    turtle.turnLeft();
 end
 
 --
@@ -184,4 +202,4 @@ end
 refreshItemLocations();
 turtle.select(fuel);
 turtle.refuel();
-buildQuarryCluster(4);
+buildQuarryCluster(2);
