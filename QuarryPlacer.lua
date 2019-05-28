@@ -36,18 +36,18 @@ end
 
 function checkCobble()
     if(turtle.getItemCount(cobbleSlot) == 0) then
-        findItemIndex("cobble");
+        cobbleSlot = findItemIndex("cobble");
     end
 end
 
 function checkMarkers()
     if(turtle.getItemCount(markerSlot) == 0) then
-        findItemIndex("marker");
+        markerSlot = findItemIndex("marker");
     end
 end
 function checkPipes()
-    if(turtle.getItemCount(markerSlot) == 0) then
-        findItemIndex("pipe");
+    if(turtle.getItemCount(woodPipeSlot) == 0) then
+        woodPipeSlot = findItemIndex("pipe");
     end
 end
 
@@ -162,6 +162,7 @@ end
 --END node section
 --
 function buildQuarryCluster(size)
+    size = math.sqrt(size);
     --outside
     for i = 1, 4, 1 do
         buildCornerNode();
@@ -202,4 +203,4 @@ end
 refreshItemLocations();
 turtle.select(fuel);
 turtle.refuel();
-buildQuarryCluster(2);
+buildQuarryCluster(16);
