@@ -21,7 +21,7 @@ function refreshItemLocations()
     mjProducerSlot = findItemIndex("producer");
     powerBridgeSlot = findItemIndex("bridge");
     fuel = findItemIndex("coal");
-    enderChestSlot = findItemIndex("chest");
+    enderChestSlot = findItemIndex("ender");
 end
 function findItemIndex(name)
     for i = 1,16,1 do
@@ -181,7 +181,11 @@ function buildQuarryCluster(size)
 
     for i = 2, size, 1 do
         for j = 2, size, 1 do
-            buildInnerNode((i + j) % 2 == 0);
+            if(i % 2 == 0) then
+                buildInnerNode(j % 2 == 0);
+            else
+                buildInnerNode(false);
+            end
             if(j < size) then
                 travel(quarrySize-1);
             end
