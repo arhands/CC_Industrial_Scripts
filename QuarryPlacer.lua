@@ -13,15 +13,17 @@ local mjProducerSlot = 0;
 local fuel = 3;
 local powerBridgeSlot = 0;
 local enderChestSlot = 0;
+local kinesisPipeSlot = 0;
 
 function refreshItemLocations()
     markerSlot = findItemIndex("marker");
     cobbleSlot = findItemIndex("cobble");
-    woodPipeSlot = findItemIndex("pipe");
+    woodPipeSlot = findItemIndex("_item");
     mjProducerSlot = findItemIndex("producer");
     powerBridgeSlot = findItemIndex("bridge");
     fuel = findItemIndex("coal");
     enderChestSlot = findItemIndex("ender");
+    kinesisPipeSlot = findItemIndex("_power");
 end
 function findItemIndex(name)
     for i = 1,16,1 do
@@ -47,7 +49,7 @@ function checkMarkers()
 end
 function checkPipes()
     if(turtle.getItemCount(woodPipeSlot) == 0) then
-        woodPipeSlot = findItemIndex("pipe");
+        woodPipeSlot = findItemIndex("_item");
     end
 end
 
@@ -130,12 +132,16 @@ function buildInnerNode(addQuarrySetup)
         end
         if(i == 3) then
             if(addQuarrySetup) then
-                travelVirtical(-height);
+                travelVirtical(-height-1);
                 turtle.select(powerBridgeSlot);
                 turtle.placeDown();
                 turtle.up();
 
                 turtle.select(mjProducerSlot);
+                turtle.placeDown();
+                turtle.up();
+
+                turtle.select(kinesisPipeSlot);
                 turtle.placeDown();
                 turtle.up();
 
