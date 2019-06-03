@@ -26,14 +26,16 @@ function refreshItemLocations()
     kinesisPipeSlot = findItemIndex("_power");
 end
 function findItemIndex(name)
-    for i = 1,16,1 do
-        if(turtle.getItemCount(i) > 0) then
-            if(string.find(turtle.getItemDetail(i).name,name) ~= nil) then
-                return i;
+    while(true) do
+        for i = 1,16,1 do
+            if(turtle.getItemCount(i) > 0) then
+                if(string.find(turtle.getItemDetail(i).name,name) ~= nil) then
+                    return i;
+                end
             end
         end
+        print(turtle.getItemDetail(i).name.." not found");
     end
-    return 16;
 end
 
 function checkCobble()
@@ -112,14 +114,6 @@ function buildInnerNode(addQuarrySetup)
     for i = 1, 4, 1 do
         buildCornerNode();
         if(addQuarrySetup) then
-            turtle.down();
-            turtle.select(cobbleSlot);
-            turtle.placeDown();
-            turtle.up();
-            checkMarkers();
-            turtle.select(markerSlot);
-            turtle.placeDown();
-            
             turtle.forward();
             travelVirtical(2 - height);
             checkPipes();
