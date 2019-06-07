@@ -34,7 +34,7 @@ function findItemIndex(name)
                 end
             end
         end
-        print(turtle.getItemDetail(i).name.." not found");
+        print(name.." not found");
     end
 end
 
