@@ -1,3 +1,10 @@
+
+--USER SETTINGS
+
+--must be a multiple of four
+local quarryCount = 16;
+
+--DONT CHANGE BELOW THIS LINE
 --place the turtle in 
 --the bottom right of 
 --where it is to place it, but note that it 
@@ -208,4 +215,4 @@ travelVirtical(height);
 refreshItemLocations();
 turtle.select(fuel);
 turtle.refuel();
-buildQuarryCluster(16);
+buildQuarryCluster(quarryCount);
