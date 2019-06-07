@@ -204,6 +204,7 @@ function buildQuarryCluster(size)
         end
     end
 end
+travelVirtical(height);
 refreshItemLocations();
 turtle.select(fuel);
 turtle.refuel();
