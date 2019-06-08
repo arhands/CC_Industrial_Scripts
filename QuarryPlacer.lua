@@ -2,9 +2,22 @@
 --USER SETTINGS
 
 --must be a multiple of four
+--AND a square
 local quarryCount = 16;
+--
+
+local waterInset = 4;
+
+--ender chest slots for the ender chests
+local enderCharged = 13;
+local enderDepleted = 14;
+local enderQuarry = 15;
+local enderWater = 16;
+--
 
 --DONT CHANGE BELOW THIS LINE
+
+
 --place the turtle in 
 --the bottom right of 
 --where it is to place it, but note that it 
@@ -19,8 +32,10 @@ local woodPipeSlot = 3;
 local mjProducerSlot = 0;
 local fuel = 3;
 local powerBridgeSlot = 0;
-local enderChestSlot = 0;
 local kinesisPipeSlot = 0;
+local euConsumerSlot = 0;
+local itemductSlot = 0;
+
 
 function refreshItemLocations()
     markerSlot = findItemIndex("marker");
@@ -29,8 +44,9 @@ function refreshItemLocations()
     mjProducerSlot = findItemIndex("producer");
     powerBridgeSlot = findItemIndex("bridge");
     fuel = findItemIndex("coal");
-    enderChestSlot = findItemIndex("ender");
     kinesisPipeSlot = findItemIndex("_power");
+    euConsumerSlot = findItemIndex("consumer");
+    itemductSlot = findItemIndex("duct");
 end
 function findItemIndex(name)
     while(true) do
@@ -43,6 +59,16 @@ function findItemIndex(name)
         end
         print(name.." not found");
     end
+end
+function checkForItem(name)--returns -1 if item not found
+    for i = 1,16,1 do
+        if(turtle.getItemCount(i) > 0) then
+            if(string.find(turtle.getItemDetail(i).name,name) ~= nil) then
+                return i;
+            end
+        end
+    end
+    return -1;
 end
 
 function checkCobble()
@@ -118,22 +144,50 @@ function buildEdgeNode(horizontal)
 end
 --no quarries or power
 function buildInnerNode(addQuarrySetup)
+    print("building inner node");
     for i = 1, 4, 1 do
-        buildCornerNode();
         if(addQuarrySetup) then
+            travelVirtical(-height);
+            checkCobble();
+            turtle.select(cobbleSlot);
+            turtle.placeDown();
+            travelVirtical(2);
+
             turtle.forward();
-            travelVirtical(2 - height);
             checkPipes();
             turtle.select(woodPipeSlot);
             turtle.placeDown();
             travelVirtical(height - 2);
             travel(quarrySpacing - 1);
         else
+            buildCornerNode();
             travel(quarrySpacing);
         end
         if(i == 3) then
             if(addQuarrySetup) then
-                travelVirtical(-height-1);
+                travelVirtical(-height-4);
+
+                turtle.select(itemductSlot);
+                turtle.place();
+                turtle.turnRight();
+                turtle.turnRight();
+                turtle.place();
+                turtle.select(cobbleSlot);
+                turtle.placeDown();
+                turtle.up();
+
+                turtle.select(enderCharged);
+                turtle.place();
+                turtle.turnRight();
+                turtle.turnRight();
+                turtle.select(enderDepleted);
+                turtle.place();
+                turtle.up();
+
+                turtle.select(euConsumerSlot);
+                turtle.placeDown();
+                turtle.up();
+
                 turtle.select(powerBridgeSlot);
                 turtle.placeDown();
                 turtle.up();
@@ -146,7 +200,7 @@ function buildInnerNode(addQuarrySetup)
                 turtle.placeDown();
                 turtle.up();
 
-                turtle.select(enderChestSlot);
+                turtle.select(enderQuarry);
                 turtle.placeDown();
                 
                 travelVirtical(height - 2);
@@ -168,13 +222,41 @@ end
 --
 --END node section
 --
+function placeWater()
+    turtle.select(enderWater);
+    turtle.placeUp();
+    turtle.suckUp();
+    turtle.placeDown();
+    turtle.drop();
+    turtle.digUp();
+end
+function travelAlongSide(inner)
+    travel(math.floor((quarrySize-1)/2));
+    turtle.turnRight();
+    travel(waterInset);
+    placeWater();
+    turtle.turnLeft();
+    turtle.turnLeft();
+    travel(waterInset);
+    if(inner) then
+        travel(waterInset);
+        placeWater();
+        turtle.turnLeft();
+        turtle.turnLeft();
+        travel(waterInset);
+        turtle.turnLeft();
+    else
+        turtle.turnRight();
+    end
+    travel(math.ceil((quarrySize-1)/2));
+end
 function buildQuarryCluster(size)
     size = math.sqrt(size);
     --outside
     for i = 1, 4, 1 do
         buildCornerNode();
         for j = 2, size, 1 do
-            travel(quarrySize-1);
+            travelAlongSide(false);
             buildEdgeNode(i % 2 == 0);
         end
         if(i < 4) then
@@ -183,7 +265,7 @@ function buildQuarryCluster(size)
         turtle.turnRight();
     end
     --inside
-    travel(quarrySize - 1);
+    travelAlongSide(true);
     turtle.turnRight();
 
     for i = 2, size, 1 do
@@ -194,25 +276,26 @@ function buildQuarryCluster(size)
                 buildInnerNode(false);
             end
             if(j < size) then
-                travel(quarrySize-1);
+                travelAlongSide(true);
             end
         end
         if(i < size) then
             if(i % 2 == 0) then
                 travel(quarrySpacing*2);
                 turtle.turnLeft();
-                travel(quarrySize-1 + 2*quarrySpacing);
+                travelAlongSide(true);
+                travel(2*quarrySpacing);
                 turtle.turnLeft();
             else
                 turtle.turnRight();
-                travel(quarrySize-1);
+                travelAlongSide(true);
                 turtle.turnRight();
             end
         end
     end
 end
-travelVirtical(height);
 refreshItemLocations();
 turtle.select(fuel);
 turtle.refuel();
+travelVirtical(height);
 buildQuarryCluster(quarryCount);
