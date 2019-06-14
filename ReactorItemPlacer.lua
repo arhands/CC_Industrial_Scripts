@@ -1,6 +1,8 @@
 --User settings
 --NOTE: current max value for V is 2
 local multFactor = 2;--the amount reactors worth of resources the turtle
+local reactorSlot = 1;--Nuclear Reactor
+local chamberSlot = 2;--Reactor Chamber
 --will get each collection run.
 --
 
@@ -138,6 +140,10 @@ function checkIfEnoughItems()--should always have at least one of every item
         return false;
     elseif(turtle.getItemCount(platingSlot) <= 7) then
         return false;
+    elseif(turtle.getItemCount(reactorSlot) <= 1) then
+        return false;
+    elseif(turtle.getItemCount(chamberSlot) <= 6) then
+        return false;
     else
         return true;
     end
@@ -145,6 +151,10 @@ end
 function travel(distance)
     if(distance == 0) then
         return;
+    end
+    if(turtle.getFuelLevel() < distance) then
+        turtle.select(fuelSlot);
+        turtle.refuel(math.ceil(1.0*distance/80));
     end
     for i = 1, distance, 1 do
         turtle.forward();
@@ -169,6 +179,10 @@ function makeSupplyRun(x,y)
     refillSlot(exchangerSlot,multFactor+1);
     refillSlot(uraniumSlot,7*multFactor+1);
     refillSlot(platingSlot,7*multFactor+1);
+
+    refillSlot(reactorSlot,multFactor+1);
+    refillSlot(chamberSlot,6*multFactor+1);
+
     refillSlot(fuelSlot,64);
     --returning
     turtle.turnLeft();
@@ -176,15 +190,45 @@ function makeSupplyRun(x,y)
     turtle.turnLeft();
     travel(y);
 end
+function placeReactor()
+    if(turtle.getFuelLevel() < 18) then
+        turtle.select(fuelSlot);
+        turtle.refuel(1);
+    end
+    turtle.down();
+    turtle.down();
+    turtle.down();
+    turtle.select(reactorSlot);
+    turtle.placeUp();
 
-function addItemsToReactors(rows,columns)
+    turtle.back();
+    turtle.select(chamberSlot);
+    turtle.place();
+
+    turtle.turnLeft();
+    for i = 1,4,1 do
+        turtle.placeUp();
+        turtle.forward();
+        turtle.turnRight();
+        turtle.forward();
+    end
+    turtle.forward();
+    turtle.up();
+    turtle.up();
+    turtle.up();
+    turtle.back();
+    turtle.turnRight();
+    turtle.forward();
+    turtle.placeDown();
+end
+function setupReactors(rows,columns)
     for i = 1, columns, 1 do
         for j = 1, rows, 1 do
             if(turtle.getFuelLevel() < 1000) then
                 turtle.select(fuelSlot);
                 turtle.refuel(16);
             end
-            --add items
+            --make sure turtle has enough items
             if(not checkIfEnoughItems()) then
                 local x = 3*(i-1);
                 if(i % 2 == 1) then
@@ -199,6 +243,9 @@ function addItemsToReactors(rows,columns)
                     turtle.turnRight();
                 end
             end
+            --build reactor
+            placeReactor();
+            --add items
             placeItemsInReactor();
             --travel to next node
             if(j < rows) then
@@ -225,6 +272,6 @@ function main()
     print("Checking Item Locations...");
     refreshItemLocations();
     print("Check complete, setting up reactors.");
-    addItemsToReactors(length,width);
+    setupReactors(length,width);
 end
 main();
