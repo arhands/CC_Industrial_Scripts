@@ -87,9 +87,7 @@ end
 function refillSlot(slot,requiredAmount)
     turtle.select(slot);
     while(requiredAmount > turtle.getItemCount()) do
-        print("waiting for items to be added to slot");
-        print(slot);
-        sleep(1);
+        turtle.suckUp();
     end
 end
 function checkIfEnoughItems()--should always have at least one of every item
