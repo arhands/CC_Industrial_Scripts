@@ -1,0 +1,80 @@
+--extreme reactor regulator
+sleep(10)
+local reactor = peripheral.wrap("back")
+local minRodLevel = 94
+local maxRodLevel = 100
+local desiredPowerRatio = 0.50
+local updateRate = 2
+local cell = peripheral.wrap('right') -- The energy cell to measure
+ 
+KP = 0.15
+KI = 0.01
+KD = 0.005
+ 
+totalAmplitude = 1 -- sum of amplitude
+totalTime = 0
+KU = 1
+TU = 1
+TU1 = 0 -- ticks since period start
+-- a period ends whenever the power level drops below desiredPowerRatio
+ 
+ 
+maxPower = cell.getEnergyCapacity()
+optimalPower = desiredPowerRatio * maxPower
+ 
+-- y := true power output
+-- r := desired power output 
+-- = y + (optimalPower - powerLevel)/aggressionConst
+-- e := error = r - y = (optimalPower - powerLevel)/aggressionConst
+-- Delta e/Delta t = (powerLevelLast - powerLevel)/(updateRate*aggressionConst)
+-- E := sum of error 
+-- Thus, we get the following for the rod level u:
+-- u = KP*e + KI*E + KD * Delta e/Delta t 
+ 
+E = 0
+powerLevelLast = cell.getEnergy()
+e0 = optimalPower - powerLevelLast
+ 
+isNegative = optimalPower > powerLevelLast 
+refreshCounter = 60
+while true do
+    refreshCounter = refreshCounter + updateRate
+    if refreshCounter >= 60 then
+        refreshCounter = 0
+        cell = peripheral.wrap('right')        
+    end
+    sleep(updateRate)
+    powerLevel = cell.getEnergy()
+    e = (optimalPower - powerLevel)
+    dedt = (e - e0)/updateRate
+    e0 = e 
+    E = E + e*updateRate
+    u = KP*e + KI*E + KD*dedt
+    u = (1 - u)*(maxRodLevel - minRodLevel) + minRodLevel
+    --print("KP = "..KP..", KI = "..KI..", KD = "..KD)
+    if u < minRodLevel then
+        u = minRodLevel
+    elseif u > maxRodLevel then
+        u = maxRodLevel
+    end
+    print("\trod level = "..u)
+    reactor.setAllControlRodLevels(u)
+    -- updating weights
+    TU1 = TU1 + updateRate
+    if isNegative and powerLevel > optimalPower then
+        TU = TU1
+        TU1 = 0
+        KU = totalTime/totalAmplitude
+        KP = KU*0.7
+        KI = 1.75*KU/TU
+        KD = KU*TU*0.105
+    end
+    if powerLevel > optimalPower then
+        totalAmplitude = totalAmplitude + powerLevel - optimalPower
+        isNegative = false
+    else
+        totalAmplitude = totalAmplitude + optimalPower - powerLevel
+        isNegative = true
+    end
+    totalTime = totalTime + updateRate
+end
